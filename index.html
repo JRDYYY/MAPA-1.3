@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>BYDLENÍ — mapa ČR</title>
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        crossorigin=""
+    >
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div id="map"></div>
+
+
+<!-- =========================
+     TOP BAR
+========================= -->
+
+<header class="topbar">
+
+    <div class="brand">
+        <span class="brand-dot"></span>
+        <span>BYDLENÍ</span>
+    </div>
+
+    <form id="searchForm" class="search">
+
+        <input
+            id="searchInput"
+            type="text"
+            placeholder="Hledat obec, ulici nebo adresu..."
+            autocomplete="off"
+        >
+
+        <button type="submit">
+            Hledat
+        </button>
+
+        <div
+            id="searchResults"
+            class="search-results"
+        ></div>
+
+    </form>
+
+
+    <select
+        id="regionSelect"
+        class="region-select"
+    >
+
+        <option value="all">
+            Celá ČR
+        </option>
+
+        <option value="praha">
+            Praha
+        </option>
+
+        <option value="stredocesky">
+            Středočeský kraj
+        </option>
+
+        <option value="jihocesky">
+            Jihočeský kraj
+        </option>
+
+        <option value="plzensky">
+            Plzeňský kraj
+        </option>
+
+        <option value="karlovarsky">
+            Karlovarský kraj
+        </option>
+
+        <option value="ustecky">
+            Ústecký kraj
+        </option>
+
+        <option value="liberecky">
+            Liberecký kraj
+        </option>
+
+        <option value="kralovehradecky">
+            Královéhradecký kraj
+        </option>
+
+        <option value="pardubicky">
+            Pardubický kraj
+        </option>
+
+        <option value="vysocina">
+            Kraj Vysočina
+        </option>
+
+        <option value="jihomoravsky">
+            Jihomoravský kraj
+        </option>
+
+        <option value="olomoucky">
+            Olomoucký kraj
+        </option>
+
+        <option value="zlinsky">
+            Zlínský kraj
+        </option>
+
+        <option value="moravskoslezsky">
+            Moravskoslezský kraj
+        </option>
+
+    </select>
+
+
+    <div class="mode-switch">
+
+        <button
+            class="active"
+            type="button"
+        >
+            Bydlení
+        </button>
+
+        <button
+            type="button"
+        >
+            Profi
+        </button>
+
+    </div>
+
+</header>
+
+
+<!-- =========================
+     STATUS
+========================= -->
+
+<div
+    id="loading"
+    class="loading hidden"
+>
+    Načítám mapu...
+</div>
+
+
+<div
+    id="errorBox"
+    class="error hidden"
+></div>
+
+
+<!-- =========================
+     MAPOVÉ VRSTVY
+========================= -->
+
+<aside class="layers-panel">
+
+    <div class="panel-header">
+
+        <div>
+
+            <div class="eyebrow">
+                MAPOVÉ VRSTVY
+            </div>
+
+            <h3>
+                Tematická mapa ČR
+            </h3>
+
+        </div>
+
+        <span class="source-badge">
+            RÚIAN
+        </span>
+
+    </div>
+
+
+    <!-- CENY -->
+
+    <div
+        class="layer-row active"
+        data-layer="price"
+    >
+
+        <input
+            type="radio"
+            name="mapLayer"
+            checked
+        >
+
+        <div class="layer-icon">
+            Kč
+        </div>
+
+        <div class="layer-info">
+
+            <strong>
+                Ceny nemovitostí
+            </strong>
+
+            <span>
+                plošná zóna
+            </span>
+
+        </div>
+
+        <span class="layer-badge real">
+            DATA
+        </span>
+
+    </div>
+
+
+    <!-- NÁJMY -->
+
+    <div
+        class="layer-row"
+        data-layer="rent"
+    >
+
+        <input
+            type="radio"
+            name="mapLayer"
+        >
+
+        <div class="layer-icon">
+            ↗
+        </div>
+
+        <div class="layer-info">
+
+            <strong>
+                Nájmy
+            </strong>
+
+            <span>
+                plošná zóna
+            </span>
+
+        </div>
+
+        <span class="layer-badge real">
+            DATA
+        </span>
+
+    </div>
+
+
+    <!-- ZELEŇ -->
+
+    <div
+        class="layer-row"
+        data-layer="green"
+    >
+
+        <input
+            type="radio"
+            name="mapLayer"
+        >
+
+        <div class="layer-icon">
+            🌿
+        </div>
+
+        <div class="layer-info">
+
+            <strong>
+                Zeleň
+            </strong>
+
+            <span>
+                plošná zóna
+            </span>
+
+        </div>
+
+        <span class="layer-badge demo">
+            DEMO
+        </span>
+
+    </div>
+
+
+    <!-- HLUK -->
+
+    <div
+        class="layer-row"
+        data-layer="noise"
+    >
+
+        <input
+            type="radio"
+            name="mapLayer"
+        >
+
+        <div class="layer-icon">
+            ◉
+        </div>
+
+        <div class="layer-info">
+
+            <strong>
+                Hluk
+            </strong>
+
+            <span>
+                plošná zóna
+            </span>
+
+        </div>
+
+        <span class="layer-badge demo">
+            DEMO
+        </span>
+
+    </div>
+
+
+    <!-- BEZPEČNOST -->
+
+    <div
+        class="layer-row"
+        data-layer="safety"
+    >
+
+        <input
+            type="radio"
+            name="mapLayer"
+        >
+
+        <div class="layer-icon">
+            ✓
+        </div>
+
+        <div class="layer-info">
+
+            <strong>
+                Bezpečnost
+            </strong>
+
+            <span>
+                plošná zóna
+            </span>
+
+        </div>
+
+        <span class="layer-badge demo">
+            DEMO
+        </span>
+
+    </div>
+
+
+    <!-- OVZDUŠÍ -->
+
+    <div
+        class="layer-row"
+        data-layer="air"
+    >
+
+        <input
+            type="radio"
+            name="mapLayer"
+        >
+
+        <div class="layer-icon">
+            AQ
+        </div>
+
+        <div class="layer-info">
+
+            <strong>
+                Ovzduší
+            </strong>
+
+            <span>
+                index kvality
+            </span>
+
+        </div>
+
+        <span class="layer-badge demo">
+            DEMO
+        </span>
+
+    </div>
+
+
+    <!-- SLUŽBY -->
+
+    <div class="layer-divider"></div>
+
+    <div class="services-title">
+        SLUŽBY A BODY ZÁJMU
+    </div>
+
+
+    <!-- ŠKOLY -->
+
+    <div
+        class="poi-row"
+        data-poi="schools"
+    >
+
+        <input
+            id="poi-schools"
+            type="checkbox"
+        >
+
+        <span class="poi-symbol blue">
+            🎓
+        </span>
+
+        <span>
+            Školy
+        </span>
+
+    </div>
+
+
+    <!-- NEMOCNICE -->
+
+    <div
+        class="poi-row"
+        data-poi="hospitals"
+    >
+
+        <input
+            id="poi-hospitals"
+            type="checkbox"
+        >
+
+        <span class="poi-symbol red">
+            +
+        </span>
+
+        <span>
+            Nemocnice
+        </span>
+
+    </div>
+
+
+    <!-- POLICIE -->
+
+    <div
+        class="poi-row"
+        data-poi="police"
+    >
+
+        <input
+            id="poi-police"
+            type="checkbox"
+        >
+
+        <span class="poi-symbol dark">
+            P
+        </span>
+
+        <span>
+            Policie
+        </span>
+
+    </div>
+
+
+    <!-- HASIČI -->
+
+    <div
+        class="poi-row"
+        data-poi="fire"
+    >
+
+        <input
+            id="poi-fire"
+            type="checkbox"
+        >
+
+        <span class="poi-symbol orange">
+            H
+        </span>
+
+        <span>
+            Hasiči
+        </span>
+
+    </div>
+
+
+    <!-- LÉKÁRNY -->
+
+    <div
+        class="poi-row"
+        data-poi="pharmacy"
+    >
+
+        <input
+            id="poi-pharmacy"
+            type="checkbox"
+        >
+
+        <span class="poi-symbol green">
+            +
+        </span>
+
+        <span>
+            Lékárny
+        </span>
+
+    </div>
+
+
+    <!-- POŠTY -->
+
+    <div
+        class="poi-row"
+        data-poi="post"
+    >
+
+        <input
+            id="poi-post"
+            type="checkbox"
+        >
+
+        <span class="poi-symbol violet">
+            P
+        </span>
+
+        <span>
+            Pošty
+        </span>
+
+    </div>
+
+
+    <!-- SOUDY -->
+
+    <div
+        class="poi-row"
+        data-poi="courthouse"
+    >
+
+        <input
+            id="poi-courthouse"
+            type="checkbox"
+        >
+
+        <span class="poi-symbol black">
+            §
+        </span>
+
+        <span>
+            Soudy
+        </span>
+
+    </div>
+
+
+    <!-- UNIVERZITY -->
+
+    <div
+        class="poi-row"
+        data-poi="university"
+    >
+
+        <input
+            id="poi-university"
+            type="checkbox"
+        >
+
+        <span class="poi-symbol purple">
+            U
+        </span>
+
+        <span>
+            Univerzity
+        </span>
+
+    </div>
+
+
+    <!-- ŠKOLKY -->
+
+    <div
+        class="poi-row"
+        data-poi="kindergarten"
+    >
+
+        <input
+            id="poi-kindergarten"
+            type="checkbox"
+        >
+
+        <span class="poi-symbol yellow">
+            K
+        </span>
+
+        <span>
+            Mateřské školy
+        </span>
+
+    </div>
+
+
+    <!-- NÁDRAŽÍ -->
+
+    <div
+        class="poi-row"
+        data-poi="railway"
+    >
+
+        <input
+            id="poi-railway"
+            type="checkbox"
+        >
+
+        <span class="poi-symbol gray">
+            🚆
+        </span>
+
+        <span>
+            Nádraží
+        </span>
+
+    </div>
+
+
+    <!-- AUTOBUS -->
+
+    <div
+        class="poi-row"
+        data-poi="bus"
+    >
+
+        <input
+            id="poi-bus"
+            type="checkbox"
+        >
+
+        <span class="poi-symbol cyan">
+            B
+        </span>
+
+        <span>
+            Autobusová nádraží
+        </span>
+
+    </div>
+
+
+    <!-- ČERPACÍ STANICE -->
+
+    <div
+        class="poi-row"
+        data-poi="fuel"
+    >
+
+        <input
+            id="poi-fuel"
+            type="checkbox"
+        >
+
+        <span class="poi-symbol orange">
+            ⛽
+        </span>
+
+        <span>
+            Čerpací stanice
+        </span>
+
+    </div>
+
+
+    <!-- PARKOVÁNÍ -->
+
+    <div
+        class="poi-row"
+        data-poi="parking"
+    >
+
+        <input
+            id="poi-parking"
+            type="checkbox"
+        >
+
+        <span class="poi-symbol blue">
+            P
+        </span>
+
+        <span>
+            Parkoviště
+        </span>
+
+    </div>
+
+
+    <!-- OBCHODY -->
+
+    <div
+        class="poi-row"
+        data-poi="supermarket"
+    >
+
+        <input
+            id="poi-supermarket"
+            type="checkbox"
+        >
+
+        <span class="poi-symbol green">
+            S
+        </span>
+
+        <span>
+            Supermarkety
+        </span>
+
+    </div>
+
+
+    <!-- LEGENDA -->
+
+    <div class="legend">
+
+        <div class="eyebrow">
+            <span id="legendTitle">
+                Ceny nemovitostí
+            </span>
+        </div>
+
+        <div
+            id="legendBar"
+            class="legend-bar price-gradient"
+        ></div>
+
+        <div class="legend-labels">
+
+            <span id="legendLow">
+                levnější
+            </span>
+
+            <span id="legendHigh">
+                dražší
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div class="panel-help">
+
+        Přibliž mapu pro podrobnější
+        území.
+
+        <br><br>
+
+        <strong>
+            kraj → okres → obec → katastr
+        </strong>
+
+        <br><br>
+
+        Body zájmu se kvůli výkonu
+        aktivují až při větším přiblížení.
+
+    </div>
+
+</aside>
+
+
+<!-- =========================
+     DETAIL
+========================= -->
+
+<aside
+    id="detailPanel"
+    class="detail-panel hidden"
+>
+
+    <div class="detail-header">
+
+        <div>
+
+            <div
+                id="detailLevel"
+                class="eyebrow"
+            >
+                LOKALITA
+            </div>
+
+            <h2 id="detailName">
+                Lokalita
+            </h2>
+
+        </div>
+
+        <button
+            id="closeDetail"
+            class="close-button"
+        >
+            ×
+        </button>
+
+    </div>
+
+
+    <div
+        id="detailContent"
+        class="detail-content"
+    ></div>
+
+</aside>
+
+
+<button
+    id="overviewButton"
+    class="overview-button"
+>
+    Přehled ČR
+</button>
+
+
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    crossorigin=""
+></script>
+
+<script src="script.js"></script>
+
+</body>
+</html>
